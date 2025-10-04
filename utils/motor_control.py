@@ -54,3 +54,13 @@ print("Motor is at:", position)
 # Disable torque and close
 packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, 0)
 portHandler.closePort()
+
+
+"""
+Safety feature:
+when voltage drops, we can have a fail safe that will move to a safe position
+turn off mode that doesn't rely on the behavior of the motors
+
+
+
+"""
