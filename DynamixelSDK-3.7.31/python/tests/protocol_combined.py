@@ -68,16 +68,17 @@ PROTOCOL_VERSION2           = 2.0
 
 # Default setting
 DXL1_ID                     = 1                 # Dynamixel#1 ID : 1
-DXL2_ID                     = 2                 # Dynamixel#2 ID : 2
+DXL2_ID                     = 1
+                 # Dynamixel#2 ID : 2
 BAUDRATE                    = 57600             # Dynamixel default baudrate : 57600
-DEVICENAME                  = '/dev/ttyUSB0'    # Check which port is being used on your controller
+DEVICENAME                  = "COM3"    # Check which port is being used on your controller
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
 TORQUE_ENABLE               = 1                 # Value for enabling the torque
 TORQUE_DISABLE              = 0                 # Value for disabling the torque
 DXL1_MINIMUM_POSITION_VALUE = 100           # Dynamixel will rotate between this value
 DXL1_MAXIMUM_POSITION_VALUE = 4000            # and this value (note that the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
-DXL2_MINIMUM_POSITION_VALUE = 100 
+DXL2_MINIMUM_POSITION_VALUE = 100
 DXL2_MAXIMUM_POSITION_VALUE = 4000
 DXL1_MOVING_STATUS_THRESHOLD = 10                # Dynamixel MX moving status threshold
 DXL2_MOVING_STATUS_THRESHOLD = 20                # Dynamixel PRO moving status threshold
@@ -118,6 +119,7 @@ else:
     quit()
 
 # Enable Dynamixel#1 Torque
+"""
 dxl_comm_result, dxl_error = packetHandler1.write1ByteTxRx(portHandler, DXL1_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_ENABLE)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler1.getTxRxResult(dxl_comm_result))
@@ -125,6 +127,8 @@ elif dxl_error != 0:
     print("%s" % packetHandler1.getRxPacketError(dxl_error))
 else:
     print("Dynamixel#%d has been successfully connected" % DXL1_ID)
+
+"""
 
 # Enable Dynamixel#2 Torque
 dxl_comm_result, dxl_error = packetHandler2.write1ByteTxRx(portHandler, DXL2_ID, ADDR_PRO_TORQUE_ENABLE, TORQUE_ENABLE)
@@ -179,7 +183,7 @@ while 1:
     if index == 0:
         index = 1
     else:
-        index = 0    
+        index = 0
 
 
 # Disable Dynamixel#1 Torque
