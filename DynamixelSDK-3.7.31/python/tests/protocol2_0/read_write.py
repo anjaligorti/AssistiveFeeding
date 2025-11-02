@@ -58,7 +58,7 @@ ADDR_PRO_PRESENT_POSITION   = 132
 PROTOCOL_VERSION            = 2.0               # See which protocol version is used in the Dynamixel
 
 # Default setting
-DXL_ID                      = 3                 # Dynamixel ID : 1
+DXL_ID                      = 1                # Dynamixel ID : 1
 BAUDRATE                    = 57600             # Dynamixel default baudrate : 57600
 DEVICENAME                  = '/dev/cu.usbserial-FT94ERDF'    # Check which port is being used on your controller
 
