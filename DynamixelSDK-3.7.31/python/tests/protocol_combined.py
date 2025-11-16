@@ -71,15 +71,15 @@ DXL1_ID                     = 1                 # Dynamixel#1 ID : 1
 DXL2_ID                     = 2
                  # Dynamixel#2 ID : 2
 BAUDRATE                    = 57600             # Dynamixel default baudrate : 57600
-DEVICENAME                  = 'COM3'    # Check which port is being used on your controller #/dev/cu.usbserial-FT94ERDF
+DEVICENAME                  = 'COM5'    # Check which port is being used on your controller #/dev/cu.usbserial-FT94ERDF
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
 TORQUE_ENABLE               = 1                 # Value for enabling the torque
 TORQUE_DISABLE              = 0                 # Value for disabling the torque
 DXL1_MINIMUM_POSITION_VALUE = 0           # Dynamixel will rotate between this value
-DXL1_MAXIMUM_POSITION_VALUE = 4096            # and this value (note t1hat the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
+DXL1_MAXIMUM_POSITION_VALUE = 4095            # and this value (note t1hat the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
 DXL2_MINIMUM_POSITION_VALUE = 0
-DXL2_MAXIMUM_POSITION_VALUE = 2048
+DXL2_MAXIMUM_POSITION_VALUE = 2047
 DXL1_MOVING_STATUS_THRESHOLD = 10                # Dynamixel MX moving status threshold
 DXL2_MOVING_STATUS_THRESHOLD = 20                # Dynamixel PRO moving status threshold
 

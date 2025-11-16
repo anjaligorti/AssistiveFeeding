@@ -55,8 +55,8 @@ from dynamixel_sdk import *                    # Uses Dynamixel SDK library
 
 # Control table address for Dynamixel MX
 ADDR_MX_TORQUE_ENABLE       = 64               # Control table address is different in Dynamixel model
-ADDR_MX_GOAL_POSITION       = 116
-ADDR_MX_PRESENT_POSITION    = 132
+ADDR_MX_GOAL_POSITION2       = 116
+ADDR_MX_PRESENT_POSITION2    = 132
 
 # Control table address for Dynamixel PRO
 ADDR_PRO_TORQUE_ENABLE      = 64
@@ -69,19 +69,18 @@ PROTOCOL_VERSION2           = 2.0
 
 # Default setting
 DXL1_ID                     = 1                 # Dynamixel#1 ID : 1
-DXL2_ID                     = 2
-                 # Dynamixel#2 ID : 2
+DXL2_ID                     = 2                 # Dynamixel#2 ID : 2
 BAUDRATE                    = 57600             # Dynamixel default baudrate : 57600
-DEVICENAME                  = 'COM3'    # Check which port is being used on your controller #/dev/cu.usbserial-FT94ERDF
+DEVICENAME                  = 'COM5'    # Check which port is being used on your controller #/dev/cu.usbserial-FT94ERDF
                                                 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
 TORQUE_ENABLE               = 1                 # Value for enabling the torque
 TORQUE_DISABLE              = 0                 # Value for disabling the torque
-DXL1_MINIMUM_POSITION_VALUE = 100           # Dynamixel will rotate between this value
-DXL1_MAXIMUM_POSITION_VALUE = 4000            # and this value (note that the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
-DXL2_MINIMUM_POSITION_VALUE = 100
-DXL2_MAXIMUM_POSITION_VALUE = 2000
-DXL1_MOVING_STATUS_THRESHOLD = 10                # Dynamixel MX moving status threshold
+DXL1_MINIMUM_POSITION_VALUE = 0           # Dynamixel will rotate between this value
+DXL1_MAXIMUM_POSITION_VALUE = 4095            # and this value (note that the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
+DXL2_MINIMUM_POSITION_VALUE = 0
+DXL2_MAXIMUM_POSITION_VALUE = 2047
+DXL1_MOVING_STATUS_THRESHOLD = 20                # Dynamixel MX moving status threshold
 DXL2_MOVING_STATUS_THRESHOLD = 20                # Dynamixel PRO moving status threshold
 
 index = 0
@@ -139,60 +138,55 @@ elif dxl_error != 0:
 else:
     print("Dynamixel#%d has been successfully connected" % DXL2_ID)
 
+
+# Turning Motors:
+
+def turn_motor(dxl_id, addr_present_position, add_goal_position, moving_status_threshold, packet_handler, maximum_pos, minimum_pos, speed: int):
+    dxl1_present_position, dxl_comm_result, dxl_error = packet_handler.read4ByteTxRx(portHandler, dxl_id, addr_present_position)
+    dxl1_goal_position = dxl1_present_position + speed
+    print(f"Position of Motor #{dxl_id}: {dxl1_present_position}")
+
+    if dxl1_goal_position > maximum_pos:
+        dxl_comm_result, dxl_error = packet_handler.write4ByteTxRx(portHandler, dxl_id, add_goal_position, maximum_pos)
+        return
+    if dxl1_goal_position < minimum_pos:
+        dxl_comm_result, dxl_error = packet_handler.write4ByteTxRx(portHandler, dxl_id, add_goal_position, minimum_pos)
+        return
+    dxl_comm_result, dxl_error = packet_handler.write4ByteTxRx(portHandler, dxl_id, add_goal_position, dxl1_goal_position)
+
+    if dxl_comm_result != COMM_SUCCESS:
+        print("%s" % packet_handler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("%s" % packet_handler.getRxPacketError(dxl_error))
+
+    while (abs(dxl1_goal_position - dxl1_present_position) > moving_status_threshold):
+        # Read Dynamixel#1 present position
+        dxl1_present_position, dxl_comm_result, dxl_error = packet_handler.read4ByteTxRx(portHandler, dxl_id, addr_present_position)
+
+        if dxl_comm_result != COMM_SUCCESS:
+            print("%s" % packet_handler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("%s" % packet_handler.getRxPacketError(dxl_error))
+
+print("Press any key to continue! (or press ESC to quit!)")
 while 1:
-    print("Press any key to continue! (or press ESC to quit!)")
-
-
     if keyboard.is_pressed('esc'):
         break
     if keyboard.is_pressed("a"):
-        time.sleep(0.5)
-
-        dxl1_present_position, dxl_comm_result, dxl_error = packetHandler1.read4ByteTxRx(portHandler, DXL1_ID, ADDR_MX_PRESENT_POSITION)
-        dxl1_goal_position = dxl1_present_position + 20
-        dxl_comm_result, dxl_error = packetHandler1.write4ByteTxRx(portHandler, DXL1_ID, ADDR_MX_GOAL_POSITION, dxl1_goal_position)
-        if dxl_comm_result != COMM_SUCCESS:
-            print("%s" % packetHandler1.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("%s" % packetHandler1.getRxPacketError(dxl_error))
-
-        while (abs(dxl1_goal_position - dxl1_present_position) > DXL1_MOVING_STATUS_THRESHOLD):
-            # Read Dynamixel#1 present position
-            dxl1_present_position, dxl_comm_result, dxl_error = packetHandler1.read4ByteTxRx(portHandler, DXL1_ID, ADDR_MX_PRESENT_POSITION)
-            if dxl_comm_result != COMM_SUCCESS:
-                print("%s" % packetHandler1.getTxRxResult(dxl_comm_result))
-            elif dxl_error != 0:
-                print("%s" % packetHandler1.getRxPacketError(dxl_error))
-
-            #print("[ID:%03d] GoalPos:%03d  PresPos:%03d" % (DXL1_ID, dxl1_goal_position[index], dxl1_present_position))
-
-    if keyboard.is_pressed("d"):
-        time.sleep(0.5)
-
-        dxl1_present_position, dxl_comm_result, dxl_error = packetHandler2.read4ByteTxRx(portHandler, DXL2_ID, ADDR_MX_PRESENT_POSITION)
-        dxl2_goal_position = dxl1_present_position + 20
-        dxl_comm_result, dxl_error = packetHandler2.write4ByteTxRx(portHandler, DXL2_ID, ADDR_MX_GOAL_POSITION, dxl1_goal_position)
-
-        if dxl_comm_result != COMM_SUCCESS:
-            print("%s" % packetHandler2.getTxRxResult(dxl_comm_result))
-        elif dxl_error != 0:
-            print("%s" % packetHandler2.getRxPacketError(dxl_error))
-
-        while (abs(dxl2_goal_position - dxl2_present_position) > DXL2_MOVING_STATUS_THRESHOLD):
-            # Read Dynamixel#2 present position
-            dxl2_present_position, dxl_comm_result, dxl_error = packetHandler2.read4ByteTxRx(portHandler, DXL2_ID, ADDR_PRO_PRESENT_POSITION)
-            if dxl_comm_result != COMM_SUCCESS:
-                print("%s" % packetHandler2.getTxRxResult(dxl_comm_result))
-            elif dxl_error != 0:
-                print("%s" % packetHandler2.getRxPacketError(dxl_error))
-
-            #print("[ID:%03d] GoalPos:%03d  PresPos:%03d" % (DXL2_ID, dxl2_goal_position[index], dxl2_present_position))
-
-
-
+        # time.sleep(0.1)
+        turn_motor(DXL1_ID, ADDR_MX_PRESENT_POSITION2, ADDR_MX_GOAL_POSITION2, DXL1_MOVING_STATUS_THRESHOLD, packetHandler1, DXL1_MAXIMUM_POSITION_VALUE, DXL1_MINIMUM_POSITION_VALUE, 100)
+    elif keyboard.is_pressed("d"):
+        # time.sleep(0.1)
+        turn_motor(DXL1_ID, ADDR_MX_PRESENT_POSITION2, ADDR_MX_GOAL_POSITION2, DXL1_MOVING_STATUS_THRESHOLD, packetHandler1, DXL1_MAXIMUM_POSITION_VALUE, DXL1_MINIMUM_POSITION_VALUE, -100)
+    if keyboard.is_pressed("j"):
+        # time.sleep(0.1)
+        turn_motor(DXL2_ID, ADDR_PRO_PRESENT_POSITION, ADDR_PRO_GOAL_POSITION, DXL2_MOVING_STATUS_THRESHOLD, packetHandler2, DXL2_MAXIMUM_POSITION_VALUE, DXL2_MINIMUM_POSITION_VALUE, 100)
+    elif keyboard.is_pressed("l"):
+        # time.sleep(0.1)
+        turn_motor(DXL2_ID, ADDR_PRO_PRESENT_POSITION, ADDR_PRO_GOAL_POSITION, DXL2_MOVING_STATUS_THRESHOLD, packetHandler2, DXL2_MAXIMUM_POSITION_VALUE, DXL2_MINIMUM_POSITION_VALUE, -100)
 
     # # Write Dynamixel#1 goal position
-    # dxl_comm_result, dxl_error = packetHandler1.write4ByteTxRx(portHandler, DXL1_ID, ADDR_MX_GOAL_POSITION, dxl1_goal_position[index])
+    # dxl_comm_result, dxl_error = packetHandler1.write4ByteTxRx(portHandler, DXL1_ID, ADDR_MX_GOAL_POSITION2, dxl1_goal_position[index])
     # if dxl_comm_result != COMM_SUCCESS:
     #     print("%s" % packetHandler1.getTxRxResult(dxl_comm_result))
     # elif dxl_error != 0:
@@ -208,7 +202,7 @@ while 1:
 
     # while 1:
     #     # Read Dynamixel#1 present position
-    #     dxl1_present_position, dxl_comm_result, dxl_error = packetHandler1.read4ByteTxRx(portHandler, DXL1_ID, ADDR_MX_PRESENT_POSITION)
+    #     dxl1_present_position, dxl_comm_result, dxl_error = packetHandler1.read4ByteTxRx(portHandler, DXL1_ID, ADDR_MX_PRESENT_POSITION2)
     #     if dxl_comm_result != COMM_SUCCESS:
     #         print("%s" % packetHandler1.getTxRxResult(dxl_comm_result))
     #     elif dxl_error != 0:
